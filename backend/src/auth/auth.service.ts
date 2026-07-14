@@ -1,8 +1,10 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
@@ -61,7 +63,7 @@ export class AuthService {
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
         this.logger.warn(`POST: auth/register: User already exists: ${dto.email}`);
-        throw new BadRequestException('User already exists');
+        throw new ConflictException('User already exists');
       }
       this.logger.error(`POST: auth/register: error: ${JSON.stringify(error)}`);
       throw new InternalServerErrorException('Server error');
@@ -88,14 +90,14 @@ export class AuthService {
       });
     } catch (error) {
       this.logger.error(`POST: auth/login: error: ${error}`);
-      throw new BadRequestException('Wrong credentials');
+      throw new UnauthorizedException('Wrong credentials');
     }
 
     // Compare the provided password with the hashed password
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      throw new BadRequestException('Wrong credentials');
+      throw new UnauthorizedException('Wrong credentials');
     }
 
     delete user.password;
