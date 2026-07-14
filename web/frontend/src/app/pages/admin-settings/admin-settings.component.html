@@ -1,0 +1,50 @@
+<div class="page">
+  <div class="admin-head">
+    <div>
+      <h1>Service Settings</h1>
+      <p class="subtitle">Configure service and integration credentials.</p>
+    </div>
+    <a class="btn btn-secondary" routerLink="/admin">← Overview</a>
+  </div>
+
+  <div class="service-list">
+    @for (group of groups(); track group.service) {
+      <section class="service card">
+        <header class="service-head">
+          <div>
+            <h2 class="service-title">{{ group.label }}</h2>
+            <p class="service-desc">{{ group.description }}</p>
+          </div>
+          @if (group.configured) {
+            <span class="badge badge-success">● Configured</span>
+          } @else {
+            <span class="badge badge-warning">● Not configured</span>
+          }
+        </header>
+
+        <form [formGroup]="forms[group.service]" (ngSubmit)="save(group)">
+          <div class="settings-grid">
+            @for (setting of group.settings; track setting.key) {
+              <div class="field">
+                <label [attr.for]="group.service + '-' + setting.key">{{ setting.key }}</label>
+                <input
+                  [id]="group.service + '-' + setting.key"
+                  [type]="setting.masked ? 'password' : 'text'"
+                  [formControlName]="setting.key"
+                  [placeholder]="setting.masked ? '•••••• (leave blank to keep)' : 'Enter ' + setting.key"
+                />
+              </div>
+            }
+          </div>
+
+          <div class="service-actions">
+            @if (savedService === group.service) {
+              <span class="saved-note">✓ Saved</span>
+            }
+            <button type="submit" class="btn btn-primary">Save {{ group.label }}</button>
+          </div>
+        </form>
+      </section>
+    }
+  </div>
+</div>

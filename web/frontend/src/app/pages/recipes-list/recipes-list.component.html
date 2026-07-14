@@ -1,0 +1,37 @@
+<div class="page">
+  <div class="list-header">
+    <div>
+      <h1>My Recipes</h1>
+      <p class="subtitle">Your personal FaithfulG collection.</p>
+    </div>
+    <a class="btn btn-primary new-btn" routerLink="/recipes/new">
+      <span aria-hidden="true">＋</span> New Recipe
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="state-block">Loading your recipes…</div>
+  } @else if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  } @else if (recipes().length === 0) {
+    <div class="empty card">
+      <div class="empty-mark">🍽️</div>
+      <h2>No recipes yet</h2>
+      <p>Start your collection by adding your first recipe.</p>
+      <a class="btn btn-primary" routerLink="/recipes/new">Add your first recipe</a>
+    </div>
+  } @else {
+    <ul class="recipe-grid">
+      @for (recipe of recipes(); track recipe.id) {
+        <li class="recipe-card card" data-testid="recipe-item">
+          <a class="recipe-link" [routerLink]="['/recipes', recipe.id, 'edit']">
+            <h3 class="recipe-title">{{ recipe.title }}</h3>
+            <p class="recipe-meta">{{ count(recipe.ingredients) }} ingredients · {{ count(recipe.steps) }} steps</p>
+            <p class="recipe-preview">{{ preview(recipe.ingredients) }}</p>
+            <span class="recipe-cta">Edit recipe →</span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -1,0 +1,38 @@
+.form-page { max-width: 680px; }
+
+.back-link { display: inline-block; margin-bottom: var(--space-3); font-size: 0.9rem; font-weight: 600; }
+.subtitle { margin: 0 0 var(--space-5); color: var(--color-text-muted); }
+
+.form-card { padding: var(--space-5); }
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.danger-zone {
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border-color: var(--color-danger-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.danger-copy h3 { margin: 0 0 2px; color: var(--color-danger); font-size: 1rem; }
+.danger-copy p { margin: 0; font-size: 0.85rem; color: var(--color-text-muted); }
+.confirm-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+
+.empty { text-align: center; padding: var(--space-7) var(--space-5); }
+.empty-mark { font-size: 2.6rem; }
+.empty p { color: var(--color-text-muted); margin-bottom: var(--space-5); }
+
+@media (max-width: 768px) {
+  .form-actions { flex-direction: column-reverse; }
+  .form-actions .btn { width: 100%; }
+  .danger-zone { flex-direction: column; align-items: stretch; }
+  .confirm-row { justify-content: space-between; }
+}

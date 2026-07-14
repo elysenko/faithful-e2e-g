@@ -1,0 +1,56 @@
+<div class="app-shell" data-testid="app-ready">
+  @if (isLoggedIn()) {
+    <header class="app-header">
+      <a class="brand" routerLink="/recipes" aria-label="FaithfulG Recipe Box home">
+        <span class="brand-mark">🍲</span>
+        <span class="brand-name">FaithfulG</span>
+        <span class="brand-sub">Recipe Box</span>
+      </a>
+
+      <nav class="top-nav">
+        @for (item of nav(); track item.path) {
+          <a
+            class="top-nav-link"
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.path === '/recipes' }"
+          >{{ item.label }}</a>
+        }
+      </nav>
+
+      <div class="header-right">
+        @if (currentUser(); as u) {
+          <span class="user-chip" title="{{ u.email }}">
+            <span class="user-email">{{ u.email }}</span>
+            @if (isAdmin()) { <span class="badge badge-warning">Admin</span> }
+          </span>
+        }
+        <button class="btn btn-secondary logout-btn" (click)="logout()">Logout</button>
+      </div>
+    </header>
+  }
+
+  <main class="app-main" [class.plain]="!isLoggedIn()">
+    <router-outlet />
+  </main>
+
+  @if (isLoggedIn()) {
+    <nav class="bottom-nav">
+      @for (item of nav(); track item.path) {
+        <a
+          class="bottom-nav-link"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.path === '/recipes' }"
+        >
+          <span class="bottom-nav-icon">{{ item.icon }}</span>
+          <span class="bottom-nav-label">{{ item.label }}</span>
+        </a>
+      }
+      <button class="bottom-nav-link as-button" (click)="logout()">
+        <span class="bottom-nav-icon">🚪</span>
+        <span class="bottom-nav-label">Logout</span>
+      </button>
+    </nav>
+  }
+</div>

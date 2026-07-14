@@ -1,0 +1,72 @@
+<div class="page form-page">
+  <a class="back-link" routerLink="/recipes">← Back to recipes</a>
+
+  @if (notFound) {
+    <div class="empty card">
+      <div class="empty-mark">🔍</div>
+      <h2>Recipe not found</h2>
+      <p>This recipe doesn’t exist or isn’t yours.</p>
+      <a class="btn btn-primary" routerLink="/recipes">Back to my recipes</a>
+    </div>
+  } @else {
+    <h1>{{ isEdit ? 'Edit Recipe' : 'New Recipe' }}</h1>
+    <p class="subtitle">{{ isEdit ? 'Update the details below.' : 'Add a recipe to your collection.' }}</p>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">{{ errorMessage }}</div>
+    }
+
+    <form class="card form-card" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" type="text" formControlName="title" placeholder="e.g. Banitsa" />
+        @if (title?.invalid && title?.touched) {
+          <span class="form-error">A title is required.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="ingredients">Ingredients</label>
+        <textarea id="ingredients" formControlName="ingredients" rows="6"
+                  placeholder="One ingredient per line…"></textarea>
+        @if (ingredients?.invalid && ingredients?.touched) {
+          <span class="form-error">List at least one ingredient.</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="steps">Steps</label>
+        <textarea id="steps" formControlName="steps" rows="8"
+                  placeholder="Describe the steps…"></textarea>
+        @if (steps?.invalid && steps?.touched) {
+          <span class="form-error">Describe how to make it.</span>
+        }
+      </div>
+
+      <div class="form-actions">
+        <a class="btn btn-secondary" routerLink="/recipes">Cancel</a>
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          {{ isEdit ? 'Save changes' : 'Create recipe' }}
+        </button>
+      </div>
+    </form>
+
+    @if (isEdit) {
+      <div class="danger-zone card">
+        <div class="danger-copy">
+          <h3>Delete this recipe</h3>
+          <p>This action can’t be undone.</p>
+        </div>
+        @if (!confirmingDelete) {
+          <button class="btn btn-danger" (click)="requestDelete()">Delete</button>
+        } @else {
+          <div class="confirm-row">
+            <span>Are you sure?</span>
+            <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+            <button class="btn btn-danger" (click)="confirmDelete()">Yes, delete</button>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

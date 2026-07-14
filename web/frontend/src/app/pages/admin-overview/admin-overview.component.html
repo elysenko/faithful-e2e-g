@@ -1,0 +1,52 @@
+<div class="page">
+  <div class="admin-head">
+    <div>
+      <h1>Admin Overview</h1>
+      <p class="subtitle">Recipe counts across all users.</p>
+    </div>
+    <a class="btn btn-secondary" routerLink="/admin/settings">⚙️ Settings</a>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat card">
+      <span class="stat-num">{{ totalUsers }}</span>
+      <span class="stat-label">Users</span>
+    </div>
+    <div class="stat card">
+      <span class="stat-num">{{ totalRecipes }}</span>
+      <span class="stat-label">Total recipes</span>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="state-block">Loading overview…</div>
+  } @else if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  } @else {
+    <div class="table-wrap card">
+      <table class="admin-table" data-testid="admin-overview">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th class="num">Recipes</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.userId) {
+            <tr>
+              <td class="user-cell">
+                <span class="avatar" aria-hidden="true">{{ row.email.charAt(0).toUpperCase() }}</span>
+                <span class="user-email">{{ row.email }}</span>
+              </td>
+              <td class="num">
+                <span class="count-pill">{{ row.recipeCount }}</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="2" class="empty-cell">No users yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

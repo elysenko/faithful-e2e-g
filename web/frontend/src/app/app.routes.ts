@@ -1,36 +1,58 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 import { FlowRoute } from './flow-meta';
 
 // `data.flow` is the single source of truth for the user-flow graph AND the runtime navbar.
-// The colossus flow-graph extractor projects it directly (zero heuristics). Authoring rules
-// + lint: docs/flow-graph-convention.md + platform/flowgraph-static/verify/flow-lint.mjs.
-//
-// DEEP-LINKABLE STATE — every navigable UI state a user could leave feedback on must be
-// reachable by URL (so automated verification can land on it). Patterns:
-//   • wizard / multi-step → child routes, or a `?step=` query param the component restores from:
-//       { path: 'onboarding', loadComponent: …, data: { flow: { flowId:'onboarding', node:'onboarding' } }, children: [
-//         { path: 'profile', …, data: { flow: { flowId:'onboarding-profile', node:'onboarding-profile' } } },
-//         { path: 'connect', …, data: { flow: { flowId:'onboarding-connect', node:'onboarding-connect' } } },
-//       ]}
-//   • tabs / sub-tabs → child routes (preferred) or `?tab=`
-//   • modal / dialog → `?modal=<name>[&id=]` read on init (or a modal child route)
-//   • drawer / detail pane → `?panel=<name>&id=` or `/:id`
-//   • filtered / sorted list → bind the filter to query params (queryParamsHandling:'merge')
-// Never bury a navigable state in component-only state. Transient chrome (tooltip/hover) is exempt.
+// Every navigable UI state is reachable by URL so automated verification can land on it.
 export const routes: Routes = ([
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'recipes', pathMatch: 'full' },
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/login/login.component').then((m) => m.LoginComponent),
-    data: { flow: { flowId: 'login', node: 'login', entry: true, edgesTo: ['home'], label: 'Login' } },
+      import('./pages/login/login.component').then((m) => m.LoginComponent),
+    data: { flow: { flowId: 'login', node: 'login', entry: true, edgesTo: ['recipes-list', 'signup'], label: 'Login' } },
   },
   {
-    path: 'home',
+    path: 'signup',
     loadComponent: () =>
-      import('./features/home/home.component').then((m) => m.HomeComponent),
-    canActivate: [authGuard],
-    data: { flow: { flowId: 'home', node: 'home', showInNavbar: true, label: 'Home', scope: 'all' } },
+      import('./pages/signup/signup.component').then((m) => m.SignupComponent),
+    data: { flow: { flowId: 'signup', node: 'signup', edgesTo: ['recipes-list', 'login'], label: 'Sign up' } },
   },
+  {
+    path: 'recipes',
+    loadComponent: () =>
+      import('./pages/recipes-list/recipes-list.component').then((m) => m.RecipesListComponent),
+    canActivate: [authGuard],
+    data: { flow: { flowId: 'recipes-list', node: 'recipes-list', showInNavbar: true, scope: 'all', label: 'Recipes', edgesTo: ['recipe-create', 'recipe-edit'] } },
+  },
+  {
+    path: 'recipes/new',
+    loadComponent: () =>
+      import('./pages/recipe-form/recipe-form.component').then((m) => m.RecipeFormComponent),
+    canActivate: [authGuard],
+    data: { flow: { flowId: 'recipe-create', node: 'recipe-create', scope: 'all', label: 'New Recipe', edgesTo: ['recipes-list'] } },
+  },
+  {
+    path: 'recipes/:id/edit',
+    loadComponent: () =>
+      import('./pages/recipe-form/recipe-form.component').then((m) => m.RecipeFormComponent),
+    canActivate: [authGuard],
+    data: { flow: { flowId: 'recipe-edit', node: 'recipe-edit', scope: 'all', label: 'Edit Recipe', edgesTo: ['recipes-list'] } },
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./pages/admin-overview/admin-overview.component').then((m) => m.AdminOverviewComponent),
+    canActivate: [adminGuard],
+    data: { flow: { flowId: 'admin-overview', node: 'admin-overview', showInNavbar: true, scope: 'admin', label: 'Admin', edgesTo: ['admin-settings'] } },
+  },
+  {
+    path: 'admin/settings',
+    loadComponent: () =>
+      import('./pages/admin-settings/admin-settings.component').then((m) => m.AdminSettingsComponent),
+    canActivate: [adminGuard],
+    data: { flow: { flowId: 'admin-settings', node: 'admin-settings', showInNavbar: true, scope: 'admin', label: 'Settings', edgesTo: ['admin-overview'] } },
+  },
+  { path: '**', redirectTo: 'recipes' },
 ] satisfies FlowRoute[]) as Routes;

@@ -13,6 +13,9 @@
             "outputPath": "dist/frontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
+            "polyfills": ["zone.js"],
+            "assets": [],
+            "styles": ["src/styles.css"],
             "tsConfig": "tsconfig.app.json",
             "fileReplacements": [
               {
