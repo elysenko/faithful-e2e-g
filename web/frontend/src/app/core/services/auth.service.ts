@@ -1,17 +1,22 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, from, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, User } from '../models';
+import { AuthResponse, BackendAuthResponse, User } from '../models';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'user';
 
+// Mirrors backend/prisma/seed derivePassword(): sha256(email + SEED_SECRET).slice(0,16).
+// Lets "Demo Mode" sign in against the real seeded admin without a hardcoded password.
+const DEMO_ADMIN_EMAIL = 'admin@example.com';
+const SEED_SECRET = 'colossus-seed';
+
 /**
- * Auth state for the mockup. Login/register/demoLogin operate against local
- * mock state so the SPA is fully navigable without a backend. The service_agent
- * stage rewires login()/register()/me() to real HTTP calls against `${apiBase}/auth/*`.
+ * Auth service wired to the NestJS backend at `${apiBase}/auth/*`.
+ * The backend returns `{ user, token }`; we normalise that to `AuthResponse`
+ * and persist the JWT + user in localStorage for the auth interceptor/guards.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -22,46 +27,66 @@ export class AuthService {
 
   readonly currentUser = this._user.asReadonly();
   readonly isLoggedIn = computed(() => !!this._token());
-  readonly isAdmin = computed(() => this._user()?.role === 'ADMIN');
+  readonly isAdmin = computed(() => this._user()?.role === 'admin');
 
   constructor(
     private http: HttpClient,
     private router: Router,
   ) {}
 
-  /** Mock login — accepts any credentials and infers role from the email. */
-  login(email: string, _password: string): Observable<AuthResponse> {
-    const role = email.trim().toLowerCase().startsWith('admin') ? 'ADMIN' : 'USER';
-    const res: AuthResponse = {
-      accessToken: this.mockToken(email),
-      user: { id: 'u-' + role.toLowerCase(), email, role },
-    };
-    this.persist(res);
-    return of(res);
+  /** Authenticate against POST /api/auth/login. */
+  login(email: string, password: string): Observable<AuthResponse> {
+    return this.http
+      .post<BackendAuthResponse>(`${this.apiBase}/auth/login`, { email, password })
+      .pipe(
+        switchMap((res) => of(this.normalize(res))),
+        tap((res) => this.persist(res)),
+      );
   }
 
-  /** Mock register — always creates a USER (admins exist only via seed). */
-  register(email: string, _password: string): Observable<AuthResponse> {
-    const res: AuthResponse = {
-      accessToken: this.mockToken(email),
-      user: { id: 'u-new', email, role: 'USER' },
-    };
-    this.persist(res);
-    return of(res);
+  /**
+   * Register a new USER via POST /api/auth/register.
+   * The backend requires a name and a password confirmation.
+   */
+  register(
+    name: string,
+    email: string,
+    password: string,
+    passwordconf: string,
+  ): Observable<AuthResponse> {
+    return this.http
+      .post<BackendAuthResponse>(`${this.apiBase}/auth/register`, {
+        name,
+        email,
+        password,
+        passwordconf,
+      })
+      .pipe(
+        switchMap((res) => of(this.normalize(res))),
+        tap((res) => this.persist(res)),
+      );
   }
 
-  /** Demo bypass wired to the login page — signs in as a seeded ADMIN and lands on /recipes. */
+  /** Demo bypass — signs in as the seeded ADMIN using the seed's derived password. */
   demoLogin(): void {
-    const res: AuthResponse = {
-      accessToken: this.mockToken('admin@faithfulg.dev'),
-      user: { id: 'u-admin', email: 'admin@faithfulg.dev', role: 'ADMIN' },
-    };
-    this.persist(res);
-    this.router.navigate(['/recipes']);
+    from(this.deriveSeedPassword(DEMO_ADMIN_EMAIL))
+      .pipe(switchMap((password) => this.login(DEMO_ADMIN_EMAIL, password)))
+      .subscribe({
+        next: () => this.router.navigate(['/recipes']),
+        error: () => this.router.navigate(['/login']),
+      });
   }
 
+  /** Load the current user from GET /api/auth/me and refresh local state. */
   me(): Observable<User | null> {
-    return of(this._user());
+    return this.http.get<User>(`${this.apiBase}/auth/me`).pipe(
+      tap((user) => {
+        if (user) {
+          localStorage.setItem(USER_KEY, JSON.stringify(user));
+          this._user.set(user);
+        }
+      }),
+    );
   }
 
   logout(): void {
@@ -72,6 +97,11 @@ export class AuthService {
     this._token.set(null);
     this._user.set(null);
     this.router.navigate(['/login']);
+  }
+
+  /** Normalise the backend `{ user, token }` shape to the app's AuthResponse. */
+  private normalize(res: BackendAuthResponse): AuthResponse {
+    return { accessToken: res.token, user: res.user };
   }
 
   private persist(res: AuthResponse): void {
@@ -92,7 +122,13 @@ export class AuthService {
     }
   }
 
-  private mockToken(email: string): string {
-    return 'mock.' + btoa(email).replace(/=/g, '') + '.jwt';
+  /** Reproduces the backend seed's derivePassword() in the browser (SHA-256). */
+  private async deriveSeedPassword(email: string): Promise<string> {
+    const data = new TextEncoder().encode(email + SEED_SECRET);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    const hex = Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    return hex.slice(0, 16);
   }
 }

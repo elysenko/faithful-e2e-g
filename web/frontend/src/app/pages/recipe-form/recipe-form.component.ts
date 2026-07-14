@@ -41,15 +41,24 @@ export class RecipeFormComponent implements OnInit {
   ngOnInit(): void {
     this.recipeId = this.route.snapshot.paramMap.get('id');
     if (this.recipeId) {
-      const recipe = this.recipeService.getById(this.recipeId);
-      if (!recipe) {
-        this.notFound = true;
-        return;
-      }
-      this.form.patchValue({
-        title: recipe.title,
-        ingredients: recipe.ingredients,
-        steps: recipe.steps,
+      this.loading = true;
+      this.recipeService.getById(this.recipeId).subscribe({
+        next: (recipe) => {
+          this.form.patchValue({
+            title: recipe.title,
+            ingredients: recipe.ingredients,
+            steps: recipe.steps,
+          });
+          this.loading = false;
+        },
+        error: (err) => {
+          this.loading = false;
+          if (err?.status === 404) {
+            this.notFound = true;
+          } else {
+            this.errorMessage = err?.error?.message ?? 'Could not load the recipe.';
+          }
+        },
       });
     }
   }
@@ -60,23 +69,39 @@ export class RecipeFormComponent implements OnInit {
       return;
     }
     this.loading = true;
+    this.errorMessage = '';
     const value = this.form.value as { title: string; ingredients: string; steps: string };
 
-    if (this.isEdit && this.recipeId) {
-      this.recipeService.update(this.recipeId, value);
-    } else {
-      this.recipeService.create(value);
-    }
-    this.router.navigate(['/recipes']);
+    const request$ =
+      this.isEdit && this.recipeId
+        ? this.recipeService.update(this.recipeId, value)
+        : this.recipeService.create(value);
+
+    request$.subscribe({
+      next: () => this.router.navigate(['/recipes']),
+      error: (err) => {
+        this.errorMessage = err?.error?.message ?? 'Could not save the recipe.';
+        this.loading = false;
+      },
+    });
   }
 
   requestDelete(): void { this.confirmingDelete = true; }
   cancelDelete(): void { this.confirmingDelete = false; }
 
   confirmDelete(): void {
-    if (this.recipeId) {
-      this.recipeService.remove(this.recipeId);
+    if (!this.recipeId) {
+      this.router.navigate(['/recipes']);
+      return;
     }
-    this.router.navigate(['/recipes']);
+    this.loading = true;
+    this.recipeService.remove(this.recipeId).subscribe({
+      next: () => this.router.navigate(['/recipes']),
+      error: (err) => {
+        this.errorMessage = err?.error?.message ?? 'Could not delete the recipe.';
+        this.loading = false;
+        this.confirmingDelete = false;
+      },
+    });
   }
 }

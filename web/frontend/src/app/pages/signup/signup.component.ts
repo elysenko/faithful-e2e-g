@@ -50,9 +50,9 @@ export class SignupComponent {
     }
     this.loading = true;
     this.errorMessage = '';
-    const { email, password } = this.form.value;
+    const { name, email, password, confirm } = this.form.value;
 
-    this.auth.register(email, password).subscribe({
+    this.auth.register(name, email, password, confirm).subscribe({
       next: () => this.router.navigate(['/recipes']),
       error: (err) => {
         this.errorMessage = err?.error?.message ?? 'Could not create the account. Try a different email.';

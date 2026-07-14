@@ -1,10 +1,19 @@
-export type Role = 'USER' | 'ADMIN';
+// Roles match the backend Prisma enum (lowercase).
+export type Role = 'user' | 'admin';
 
 export interface User {
   id: string;
+  name?: string;
   email: string;
   role: Role;
+  image?: string;
   createdAt?: string;
+}
+
+/** Raw auth payload returned by the NestJS backend (`{ user, token }`). */
+export interface BackendAuthResponse {
+  user: User;
+  token: string;
 }
 
 export interface Recipe {

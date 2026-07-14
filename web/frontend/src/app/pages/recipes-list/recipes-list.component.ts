@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RecipeService } from '../../core/services/recipe.service';
@@ -10,14 +10,25 @@ import { RecipeService } from '../../core/services/recipe.service';
   templateUrl: './recipes-list.component.html',
   styleUrl: './recipes-list.component.css',
 })
-export class RecipesListComponent {
-  // UI state flags kept for loading/error scaffolding the service_agent can drive.
+export class RecipesListComponent implements OnInit {
   loading = false;
   error = '';
 
   readonly recipes = this.recipeService.recipes;
 
   constructor(private recipeService: RecipeService) {}
+
+  ngOnInit(): void {
+    this.loading = true;
+    this.error = '';
+    this.recipeService.load().subscribe({
+      next: () => (this.loading = false),
+      error: (err) => {
+        this.error = err?.error?.message ?? 'Could not load recipes.';
+        this.loading = false;
+      },
+    });
+  }
 
   /** Short one-line preview from multi-line ingredients text. */
   preview(text: string): string {
