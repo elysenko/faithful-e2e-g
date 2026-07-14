@@ -35,3 +35,31 @@ spec:
             - secretRef:
                 name: app-secrets
                 optional: true
+          ports:
+            - containerPort: 80
+          # Readiness: only receive traffic once the API answers. Liveness has a
+          # generous initial delay so first-boot `migrate deploy` + seed can finish
+          # before the container is considered unhealthy.
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi

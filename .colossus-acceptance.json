@@ -1,5 +1,12 @@
 {
   "ready_testid": "app-ready",
-  "expect_text": [],
-  "reject_signatures": ["Welcome</h1>", "You are logged in.", "Loading..."]
+  "expect_text": ["faithfulg", "sign in to your kitchen"],
+  "reject_signatures": [
+    "Welcome</h1>",
+    "You are logged in.",
+    "Loading...",
+    "home-title\">Users<",
+    "Deployed via Colossus",
+    "no application code yet"
+  ]
 }

@@ -12,6 +12,10 @@ import { AdminModule } from './admin/admin.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
+// Note: static serving of the compiled Angular SPA is wired directly in main.ts
+// (useStaticAssets + an explicit SPA fallback) rather than via ServeStaticModule,
+// whose sendFile-based fallback is broken under Express 5.
+
 @Module({
   imports: [
     ConfigModule.forRoot({
