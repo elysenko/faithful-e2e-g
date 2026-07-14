@@ -39,6 +39,19 @@ export class AuthController {
     response.status(HttpStatus.OK).send(data);
   }
 
+  @Get('me')
+  @ApiOperation({
+    summary: 'ME',
+    description: 'Private endpoint returning the currently authenticated user.',
+  })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Ok', type: User })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @Auth()
+  me(@GetUser() user: User) {
+    return user;
+  }
+
   @Get('refresh-token')
   @ApiOperation({
     summary: 'REFRESH TOKEN',

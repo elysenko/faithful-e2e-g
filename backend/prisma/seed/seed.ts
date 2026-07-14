@@ -24,6 +24,8 @@ const SEED_USERS = [
 ];
 
 async function main() {
+  const emitted: { role: string; email: string; password: string }[] = [];
+
   for (const u of SEED_USERS) {
     const plainPassword = derivePassword(u.email);
     const hashedPassword = bcryptjs.hashSync(plainPassword, 10);
@@ -34,8 +36,11 @@ async function main() {
       create: { name: u.name, email: u.email, password: hashedPassword, role: u.role },
     });
 
-    console.log(`SEED_CRED ${u.role} ${u.email} ${plainPassword}`);
+    emitted.push({ role: u.role, email: u.email, password: plainPassword });
   }
+
+  // Colossus parses this line to surface demo logins.
+  console.log(`SEED_CREDS_JSON=${JSON.stringify(emitted)}`);
 }
 
 main()

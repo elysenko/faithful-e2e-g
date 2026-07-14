@@ -7,6 +7,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { validateConfig } from './common/config/env.config';
 import { HealthModule } from './health/health.module';
+import { RecipesModule } from './recipes/recipes.module';
+import { AdminModule } from './admin/admin.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -28,6 +30,8 @@ import { APP_GUARD } from '@nestjs/core';
     PrismaModule,
     UserModule,
     HealthModule,
+    RecipesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

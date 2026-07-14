@@ -9,7 +9,9 @@ import helmet from 'helmet';
 export async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api/v1');
+  // All API routes are served under /api. The Angular frontend calls relative
+  // `api/...` paths and the nginx sidecar proxies `/api/` → backend:3000/api/.
+  app.setGlobalPrefix('api');
 
   const configService = app.get(ConfigService);
   app.use(helmet());
@@ -35,11 +37,13 @@ export async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('api', app, document, swaggerOptions);
+  // Swagger UI is mounted at /docs (NOT /api, which is now the global route prefix).
+  SwaggerModule.setup('docs', app, document, swaggerOptions);
 
   // End Swagger Configurations --------------------------------
 
-  await app.listen(3000);
-  Logger.log(`App running on Port 3000`);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+  Logger.log(`App running on Port ${port}`);
 }
 bootstrap();
