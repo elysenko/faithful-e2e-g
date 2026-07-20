@@ -1,0 +1,13 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile",
+    "method": "dockerfile",
+    "port": 80
+  },
+  "env": {
+    "required": []
+  },
+  "name": "faithful-e2e-g",
+  "run": {},
+  "schemaVersion": 1
+}
