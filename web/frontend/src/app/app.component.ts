@@ -1,11 +1,10 @@
 import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Meta } from '@angular/platform-browser';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
 
-const CANARY_NAME = 'colossus-canary';
-const CANARY_CONTENT = '2026-09-14T08:41Z';
+export const CANARY_NAME = 'colossus-canary';
+export const CANARY_CONTENT = '2026-09-14T08:41Z';
 
 interface NavItem {
   label: string;
@@ -37,30 +36,9 @@ export class AppComponent {
     this.allNav.filter((item) => !item.adminOnly || this.isAdmin()),
   );
 
-  constructor(
-    private auth: AuthService,
-    private meta: Meta,
-  ) {
-    this.syncCanaryMeta();
-  }
-
-  /**
-   * The canary meta tag is declared statically in index.html, but a stale
-   * cached/regenerated shell can be served with an outdated (or duplicated)
-   * value. Normalise it at runtime so every route renders exactly one
-   * colossus-canary tag carrying the current timestamp. Other shell meta tags
-   * (viewport, theme-color, colossus-mockup-probe*) are left untouched.
-   */
-  private syncCanaryMeta(): void {
-    const selector = `name="${CANARY_NAME}"`;
-    // removeTag only drops the first match, so loop until none remain.
-    let guard = 0;
-    while (this.meta.getTag(selector) && guard < 50) {
-      this.meta.removeTag(selector);
-      guard += 1;
-    }
-    this.meta.addTag({ name: CANARY_NAME, content: CANARY_CONTENT });
-  }
+  // The colossus-canary meta tag is normalised in main.ts, before bootstrap, so
+  // the rendered head is correct even if the component tree never renders.
+  constructor(private auth: AuthService) {}
 
   logout(): void {
     this.auth.logout();
