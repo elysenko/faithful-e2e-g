@@ -5,7 +5,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
 
 const CANARY_NAME = 'colossus-canary';
-const CANARY_CONTENT = '2026-09-13T08:41Z';
+const CANARY_CONTENT = '2026-09-14T08:41Z';
 
 interface NavItem {
   label: string;
