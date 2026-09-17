@@ -11,8 +11,12 @@ WORKDIR /fe
 COPY web/frontend/package*.json ./
 RUN npm ci
 COPY web/frontend/ ./
-# base-href must stay /faithful-e2e-g/ — the ingress serves the app under that path.
-RUN npx ng build --configuration production --base-href /faithful-e2e-g/
+# base-href must stay relative ("./") so the emitted asset URLs resolve correctly
+# BOTH under the /faithful-e2e-g/ ingress path AND when the app is served from the
+# domain root (staging hosts the app at /). A hardcoded /faithful-e2e-g/ prefix makes
+# every bundle request 404 under a root-served host, which hits the SPA fallback and
+# prevents Angular from bootstrapping at all.
+RUN npx ng build --configuration production --base-href ./
 
 # ---- Stage 2: build the NestJS backend ----
 FROM node:20-alpine AS backend

@@ -1,4 +1,6 @@
 <div class="app-shell" data-testid="app-ready">
+  <p class="probe-marker" data-testid="u9-probe">U9-1789669620</p>
+
   @if (isLoggedIn()) {
     <header class="app-header">
       <a class="brand" routerLink="/recipes" aria-label="FaithfulG Recipe Box home">
@@ -31,7 +33,6 @@
   }
 
   <main class="app-main" [class.plain]="!isLoggedIn()">
-    <p class="probe-marker" data-testid="u9-probe">U9-1789669620</p>
     <router-outlet />
   </main>
 
