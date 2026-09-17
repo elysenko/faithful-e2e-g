@@ -114,3 +114,13 @@
   .bottom-nav-link.active { color: var(--color-primary); }
   .bottom-nav-icon { font-size: 1.25rem; line-height: 1; }
 }
+
+/* ---- E2E probe marker ---- */
+.probe-marker {
+  margin: 0;
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 0.7;
+}
