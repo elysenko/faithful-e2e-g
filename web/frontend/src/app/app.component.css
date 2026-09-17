@@ -118,9 +118,10 @@
 /* ---- E2E probe marker ---- */
 .probe-marker {
   margin: 0;
-  padding: 2px 8px;
-  font-size: 11px;
+  padding: 4px 8px;
+  font-size: 13px;
   line-height: 1.4;
   text-align: center;
-  opacity: 0.7;
+  color: var(--color-text);
+  opacity: 1;
 }

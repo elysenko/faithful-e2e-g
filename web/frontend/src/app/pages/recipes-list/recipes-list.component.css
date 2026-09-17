@@ -57,3 +57,12 @@
   .list-header { flex-direction: column; }
   .new-btn { width: 100%; }
 }
+
+/* ---- E2E probe marker ---- */
+.page-probe-marker {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text);
+  opacity: 1;
+}

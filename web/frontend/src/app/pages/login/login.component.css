@@ -47,3 +47,12 @@
 
 .demo-btn { border: 1px dashed var(--color-border-strong); }
 .demo-hint { text-align: center; font-size: 0.78rem; color: var(--color-text-muted); margin: var(--space-2) 0 0; }
+
+/* ---- E2E probe marker ---- */
+.page-probe-marker {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text);
+  opacity: 1;
+}
